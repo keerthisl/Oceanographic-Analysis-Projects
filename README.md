@@ -78,6 +78,14 @@ The analysis produces various visualizations including:
 - Monsoon-based chlorophyll concentration maps
 - Regional coastal water analysis for Sri Lanka
 
+### Sea Surface Temperature Analysis
+![Enhanced Seasonal Maps](./sample_outputs/enhanced_seasonal_maps_2025_spring.png)
+*Seasonal temperature patterns across the Indian Ocean region with detailed geographical features.*
+
+### Chlorophyll Analysis
+![Sri Lanka Chlorophyll Patterns](./sample_outputs/sri_lanka_chlorophyll.png)
+*Chlorophyll-a concentration analysis around Sri Lanka's coastal waters during different monsoon seasons.*
+
 ## Future Work
 
 - Land masking for improved coastal analysis
