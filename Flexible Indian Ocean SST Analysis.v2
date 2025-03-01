@@ -1,0 +1,442 @@
+# %% [markdown]
+# # Flexible Indian Ocean SST Analysis
+# 
+# ## Project Documentation and Code
+# **Version:** 2.0.0  
+# **Last Updated:** February 28, 2025  
+# **Author:** Keerthi Abe
+# 
+# ## Table of Contents
+# 1. [Project Overview](#1.-Project-Overview)
+# 2. [Setup and Dependencies](#2.-Setup-and-Dependencies)
+# 3. [Project Structure](#3.-Project-Structure)
+# 4. [Input Data Requirements](#4.-Input-Data-Requirements)
+# 5. [Code Implementation](#5.-Code-Implementation)
+# 6. [Output Descriptions](#6.-Output-Descriptions)
+# 7. [Version History](#7.-Version-History)
+# 
+# ## 1. Project Overview
+# This project provides a flexible framework for analyzing Sea Surface Temperature (SST) patterns across the Indian Ocean region. The analysis incorporates:
+# - Seasonal temperature cycle detection
+# - Regional temperature pattern analysis
+# - Enhanced geographical visualization
+# - Statistical analysis with proper spatial weighting
+# - Support for multiple data formats and resolutions
+# 
+# ### Key Features
+# - Flexible data file selection with size information
+# - Seasonal cycle detection and visualization
+# - Regional focus (Full Indian Ocean, Arabian Sea, Bay of Bengal)
+# - Enhanced geographical features using Cartopy
+# - Automated output generation with timestamps
+# 
+# ## 2. Setup and Dependencies
+# 
+# ### Required Packages
+# ```python
+# Python 3.12.7
+# - xarray
+# - matplotlib
+# - numpy
+# - cartopy
+# - jupyter
+# - netCDF4
+# ```
+# 
+# ### Installation Instructions
+# ```bash
+# conda create -n ocean_analysis python=3.12.7
+# conda activate ocean_analysis
+# conda install xarray matplotlib numpy cartopy jupyter netCDF4
+# ```
+# 
+# ## 3. Project Structure
+# ```
+# OceanAnalysis/
+# ├── code/
+# │   └── Flexible_Indian_Ocean_SST_Analysis_v2.0.0.ipynb
+# ├── data/
+# │   ├── ersstV5_54_23_IOR.nc
+# │   ├── NOAA_Daily_Op_Interpolation_SST_subset1feb.nc
+# │   └── (other NetCDF files)
+# ├── output/
+# │   ├── figures/
+# │   └── seasonal_stats_{timestamp}.txt
+# └── docs/
+#     └── documentation.html
+# ```
+# 
+# ## 4. Input Data Requirements
+# - **Format:** NetCDF (.nc)
+# - **Variable:** sst (Sea Surface Temperature)
+# - **Dimensions:** time, latitude, longitude
+# - **Region:** Indian Ocean (approximately 30-120°E, -30-30°N)
+# 
+# ## 5. Code Implementation
+
+# %%
+#=================================
+# Section 1: Setup and Imports (v2.0.0)
+#=================================
+import xarray as xr
+import matplotlib.pyplot as plt
+import numpy as np
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import os
+from datetime import datetime
+import glob
+
+# Version info
+VERSION = "2.0.0"
+SCRIPT_NAME = "Flexible Indian Ocean SST Analysis"
+
+# Project directories
+project_dir = r"C:\Users\keert\Documents\PyProjects\OceanAnalysis"
+data_dir = os.path.join(project_dir, "data")
+output_dir = os.path.join(project_dir, "output")
+figure_dir = os.path.join(output_dir, "figures")
+
+# Create directories if they don't exist
+for directory in [data_dir, output_dir, figure_dir]:
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        print(f"Created directory: {directory}")
+
+# %% [markdown]
+# ### Region and Season Definitions
+# The following code defines standard regions and seasons for the analysis.
+
+# %%
+# Define standard regions for analysis
+regions = {
+    'Full Indian Ocean': [30, 120, -30, 30],  # Entire Indian Ocean region
+    'Arabian Sea': [50, 80, 5, 25],           # Arabian Sea specific region
+    'Bay of Bengal': [80, 100, 5, 25]         # Bay of Bengal specific region
+}
+
+# Define standard seasons for temporal analysis
+seasons = {
+    'Winter (DJF)': [12, 1, 2],     # December, January, February
+    'Spring (MAM)': [3, 4, 5],      # March, April, May
+    'Summer (JJA)': [6, 7, 8],      # June, July, August
+    'Autumn (SON)': [9, 10, 11]     # September, October, November
+}
+
+print(f"Running {SCRIPT_NAME} version {VERSION}")
+print(f"Analysis start time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+# %% [markdown]
+# ## Section 2: Data File Selection (v2.0.0)
+# This section lists available NetCDF files in the data directory and allows selection of a file for analysis.
+
+# %%
+def list_data_files():
+    """List all available NetCDF files in the data directory with their sizes."""
+    nc_files = glob.glob(os.path.join(data_dir, '*.nc'))
+    if not nc_files:
+        print("No NetCDF files found in the data directory!")
+        return []
+    
+    print("\nAvailable data files:")
+    for i, file in enumerate(nc_files, 1):
+        # Get file size in MB
+        file_size_bytes = os.path.getsize(file)
+        file_size_mb = file_size_bytes / (1024 * 1024)
+        
+        # Format size with 2 decimal places if less than 1000 MB, otherwise in GB
+        if file_size_mb < 1000:
+            size_str = f"{file_size_mb:.2f} MB"
+        else:
+            file_size_gb = file_size_mb / 1024
+            size_str = f"{file_size_gb:.2f} GB"
+            
+        print(f"{i}. {os.path.basename(file)} ({size_str})")
+    return nc_files
+
+# List available files
+nc_files = list_data_files()
+
+# Set the data file to use
+# Update this line to change the file for analysis
+current_file = 'NOAA_Daily_Op_Interpolation_SST_subset1feb.nc'
+print(f"\nCurrently selected file: {current_file}")
+
+# %% [markdown]
+# ## Section 3: Data Loading (v2.0.0)
+# This section loads the selected NetCDF file and displays metadata about the dataset.
+
+# %%
+def load_data(filename):
+    """Load the selected NetCDF file with error handling."""
+    try:
+        data_file = os.path.join(data_dir, filename)
+        if not os.path.exists(data_file):
+            raise FileNotFoundError(f"Data file not found: {data_file}")
+        
+        data = xr.open_dataset(data_file)
+        print(f"\nAnalysis run on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("\nDataset information:")
+        print(data)
+        return data
+        
+    except Exception as e:
+        print(f"Error loading data: {str(e)}")
+        return None
+
+# Load the selected file
+data = load_data(current_file)
+
+# %% [markdown]
+# ## Section 4: Basic Statistics (v2.0.0)
+# This section calculates and displays basic statistical properties of the SST dataset.
+
+# %%
+if data is not None:
+    print("\nBasic Statistics:")
+    print("Mean SST:", f"{data.sst.mean().values:.2f}°C")
+    print("Max SST:", f"{data.sst.max().values:.2f}°C")
+    print("Min SST:", f"{data.sst.min().values:.2f}°C")
+
+# %% [markdown]
+# ## Section 5: Seasonal Analysis (v2.0.0)
+# Analyzes and visualizes the seasonal temperature cycle across the Indian Ocean.
+
+# %%
+if data is not None:
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+    seasonal_cycle = data.sst.groupby('time.month').mean()
+    
+    # Apply spatial weighting based on latitude
+    weights = np.cos(np.deg2rad(seasonal_cycle.lat))
+    mean_sst = seasonal_cycle.weighted(weights).mean(dim=['lat', 'lon'])
+    
+    plt.figure(figsize=(12, 6))
+    mean_sst.plot(marker='o')
+    plt.title(f'Indian Ocean Seasonal Temperature Cycle\nv{VERSION}')
+    plt.xlabel('Month')
+    plt.ylabel('Temperature (°C)')
+    plt.grid(True)
+    
+    filename = f'seasonal_cycle_{timestamp}.png'
+    plt.savefig(os.path.join(figure_dir, filename), 
+                dpi=300, bbox_inches='tight')
+    print(f"Saved seasonal cycle plot as: {filename}")
+    plt.show()
+
+# %% [markdown]
+# ## Section 6: Enhanced Seasonal Maps (v2.0.0)
+# Creates detailed seasonal temperature maps with enhanced geographical features.
+
+# %%
+if data is not None:
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+    fig, axes = plt.subplots(2, 2, figsize=(15, 12),
+                            subplot_kw={'projection': ccrs.PlateCarree()})
+    axes = axes.flat
+    vmin, vmax = 25, 30
+
+    for i, (season, months) in enumerate(seasons.items()):
+        ax = axes[i]
+        seasonal_data = data.sst.sel(time=data.time.dt.month.isin(months)).mean('time')
+        
+        # Plot temperature data with customized colorbar
+        im = seasonal_data.plot(ax=ax, transform=ccrs.PlateCarree(),
+                              cmap='RdYlBu_r', 
+                              vmin=vmin, vmax=vmax,
+                              cbar_kwargs={
+                                  'label': 'Temperature (°C)',
+                                  'shrink': 0.5,
+                                  'aspect': 20,
+                                  'pad': 0.02
+                              })
+        
+        # Add enhanced cartographic features
+        ax.add_feature(cfeature.OCEAN, facecolor='lightblue', alpha=0.3)
+        ax.add_feature(cfeature.LAND, facecolor='lightgreen', alpha=0.3)
+        ax.add_feature(cfeature.COASTLINE, linewidth=0.8, edgecolor='black')
+        ax.add_feature(cfeature.BORDERS, linestyle=':', color='gray')
+        ax.add_feature(cfeature.LAKES, alpha=0.5)
+        ax.add_feature(cfeature.RIVERS, linewidth=0.5, edgecolor='blue')
+
+        # Add gridlines with proper formatting
+        gl = ax.gridlines(draw_labels=True, linewidth=0.5, color='gray', 
+                        alpha=0.5, linestyle='--')
+        gl.top_labels = False
+        gl.right_labels = False
+        
+        ax.set_title(f'{season}', fontsize=12, pad=10)
+        ax.set_extent(regions['Full Indian Ocean'], crs=ccrs.PlateCarree())
+
+    plt.suptitle(f'Indian Ocean Seasonal Temperature Patterns\nv{VERSION}', 
+                 fontsize=16, y=0.95)
+    plt.tight_layout()
+    
+    filename = f'enhanced_seasonal_maps_{timestamp}.png'
+    plt.savefig(os.path.join(figure_dir, filename), 
+                dpi=300, bbox_inches='tight')
+    print(f"Saved enhanced seasonal maps as: {filename}")
+    plt.show()
+
+# %% [markdown]
+# ## Section 7: Regional Analysis (v2.0.0)
+# Conducts detailed analysis of specific regions in the Indian Ocean.
+
+# %%
+if data is not None:
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+    
+    for region_name, region_extent in regions.items():
+        if region_name != 'Full Indian Ocean':
+            plt.figure(figsize=(12, 8))
+            ax = plt.axes(projection=ccrs.PlateCarree())
+            
+            # Calculate seasonal means for this region for statistical context
+            seasonal_means = {}
+            for season, months in seasons.items():
+                seasonal_data = data.sst.sel(time=data.time.dt.month.isin(months))
+                # Extract just the region we're interested in
+                region_data = seasonal_data.sel(
+                    lon=slice(region_extent[0], region_extent[1]),
+                    lat=slice(region_extent[2], region_extent[3])
+                )
+                seasonal_means[season] = float(region_data.mean().values)
+            
+            # Plot annual mean for this region
+            annual_mean = data.sst.mean('time')
+            
+            im = annual_mean.plot(ax=ax, transform=ccrs.PlateCarree(),
+                               cmap='RdYlBu_r',
+                               vmin=vmin, vmax=vmax,
+                               cbar_kwargs={
+                                   'label': 'Temperature (°C)',
+                                   'shrink': 0.6,
+                                   'aspect': 25,
+                                   'pad': 0.02
+                               })
+            
+            # Add cartographic features for better visualization
+            ax.add_feature(cfeature.OCEAN, facecolor='lightblue', alpha=0.3)
+            ax.add_feature(cfeature.LAND, facecolor='lightgreen', alpha=0.3)
+            ax.add_feature(cfeature.COASTLINE, linewidth=0.8, edgecolor='black')
+            ax.add_feature(cfeature.BORDERS, linestyle=':', color='gray')
+            ax.add_feature(cfeature.LAKES, alpha=0.5)
+            ax.add_feature(cfeature.RIVERS, linewidth=0.5, edgecolor='blue')
+            
+            gl = ax.gridlines(draw_labels=True, linewidth=0.5, color='gray', 
+                            alpha=0.5, linestyle='--')
+            gl.top_labels = False
+            gl.right_labels = False
+            
+            ax.set_extent(region_extent, crs=ccrs.PlateCarree())
+            
+            # Add seasonal statistics in text box for context
+            stats_text = "Seasonal Means:\n"
+            for season, mean in seasonal_means.items():
+                stats_text += f"{season.split('(')[0].strip()}: {mean:.2f}°C\n"
+            
+            plt.gcf().text(0.15, 0.15, stats_text, fontsize=8,
+                          bbox=dict(facecolor='white', alpha=0.7))
+            
+            plt.title(f'Annual Mean Temperature - {region_name}\nv{VERSION}')
+            
+            filename = f'temperature_map_{region_name.lower().replace(" ", "_")}_{timestamp}.png'
+            plt.savefig(os.path.join(figure_dir, filename),
+                        dpi=300, bbox_inches='tight')
+            print(f"Saved {region_name} analysis as: {filename}")
+            plt.show()
+
+# %% [markdown]
+# ## Section 8: Statistical Analysis and Output (v2.0.0)
+# This section calculates detailed statistics for each season and region, saving the results to a file.
+
+# %%
+if data is not None:
+    # Generate timestamp for the filename
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+    
+    # Create filename with timestamp
+    stats_file = os.path.join(output_dir, f'seasonal_stats_{timestamp}.txt')
+    
+    with open(stats_file, 'w') as f:
+        f.write(f"{SCRIPT_NAME} version {VERSION}\n")
+        f.write(f"Analysis Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+        f.write("Sea Surface Temperature Analysis\n")
+        f.write("===============================\n\n")
+        
+        # For each region, calculate and save statistics
+        for region_name, region_extent in regions.items():
+            f.write(f"\nRegion: {region_name}\n")
+            f.write("--------------------\n")
+            
+            # Calculate seasonal statistics for this region
+            for season, months in seasons.items():
+                seasonal_data = data.sst.sel(time=data.time.dt.month.isin(months))
+                
+                # Extract just the region we're interested in
+                if region_name != 'Full Indian Ocean':
+                    region_data = seasonal_data.sel(
+                        lon=slice(region_extent[0], region_extent[1]),
+                        lat=slice(region_extent[2], region_extent[3])
+                    )
+                else:
+                    region_data = seasonal_data
+                
+                f.write(f"\n{season}:\n")
+                f.write(f"Mean: {region_data.mean().values:.2f}°C\n")
+                f.write(f"Std: {region_data.std().values:.2f}°C\n")
+                f.write(f"Max: {region_data.max().values:.2f}°C\n")
+                f.write(f"Min: {region_data.min().values:.2f}°C\n")
+    
+    print(f"\nStatistics saved to: {stats_file}")
+
+# %% [markdown]
+# ## Section 9: Cleanup (v2.0.0)
+# Releases resources and prints a completion message.
+
+# %%
+# Close all open plots
+plt.close('all')
+
+# Close the dataset to release resources
+if 'data' in locals():
+    data.close()
+
+print(f"\nAnalysis version {VERSION} completed and resources released.")
+print(f"All figures saved to: {figure_dir}")
+print(f"Statistics saved to: {output_dir}")
+print(f"Analysis end time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+# %% [markdown]
+# ## 6. Output Descriptions
+# 
+# ### Generated Files
+# 1. **Seasonal Cycle Plot**
+#    - Filename pattern: `seasonal_cycle_{timestamp}.png`
+#    - Shows monthly variations in sea surface temperature
+# 
+# 2. **Enhanced Seasonal Maps**
+#    - Filename pattern: `enhanced_seasonal_maps_{timestamp}.png`
+#    - Four-panel plot showing seasonal temperature patterns
+# 
+# 3. **Regional Analysis Maps**
+#    - Filename pattern: `temperature_map_{region}_{timestamp}.png`
+#    - Separate plots for each region (Arabian Sea, Bay of Bengal)
+# 
+# 4. **Statistics File**
+#    - Filename pattern: `seasonal_stats_{timestamp}.txt`
+#    - Contains detailed statistical analysis by region and season
+# 
+# ## 7. Version History
+# 
+# ### v2.0.0 (Current)
+# - Added comprehensive documentation and markdown sections
+# - Enhanced regional analysis with seasonal statistics
+# - Added file size display to file selection
+# - Implemented timestamp-based file naming for better organization
+# - Added version tracking for individual sections
+# 
+# ### v1.0.0
+# - Initial version with basic analysis capabilities
+# - Implemented flexible file selection
+# - Basic plotting and statistical functionality
