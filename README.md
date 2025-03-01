@@ -97,7 +97,7 @@ conda install xarray matplotlib numpy cartopy jupyter netCDF4
 ## Contributors
 
 - [Keerthi Abe](https://www.linkedin.com/in/keerthiabe/) - Primary Author
-- [Thivin Abeywickrama] - Project Supervisor
+- [Thivin Abeywickrama](https://www.linkedin.com/in/thivin-abeywickrama-54566b180/) - Project Supervisor 
 
 ## License
 
