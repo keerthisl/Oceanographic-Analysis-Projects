@@ -1,12 +1,14 @@
 # Oceanographic Analysis Projects
 
-This repository contains oceanographic data analysis projects focused on the Indian Ocean region, with emphasis on Sri Lanka coastal waters. These projects analyze both Sea Surface Temperature (SST) patterns and Chlorophyll-a concentrations using Python and Jupyter Notebooks.
+This repository contains oceanographic data analysis projects focused on the Indian Ocean region, with emphasis on regional sea surface temperature patterns and Sri Lanka coastal chlorophyll concentrations. These projects demonstrate the application of Python-based data analysis techniques to oceanographic remote sensing data.
 
-## Projects
+## Projects Overview
 
 ### 1. Indian Ocean SST Analysis
+Analysis of Sea Surface Temperature patterns across the Indian Ocean with seasonal and regional focus. This project has evolved through multiple versions:
 
-Analysis of Sea Surface Temperature patterns across the Indian Ocean with seasonal and regional focus.
+- **Version 2.0.0** (Latest): Enhanced documentation, comprehensive regional analysis, and improved visualization techniques.
+- **Version 1.0.0**: Initial implementation with flexible file selection and basic analysis.
 
 **Key Features:**
 - Flexible data file selection for different SST datasets
@@ -28,8 +30,8 @@ Analysis of Chlorophyll-a concentration patterns around Sri Lanka with monsoon-b
 
 ## Data Sources
 
-- SST Data: Extended Reconstructed Sea Surface Temperature (ERSST) datasets
-- Chlorophyll Data: ESA CCI Ocean Colour Product data
+- **SST Data**: Extended Reconstructed Sea Surface Temperature (ERSST) datasets and NOAA operational daily SST products
+- **Chlorophyll Data**: ESA CCI Ocean Colour Product data
 
 ## Technical Implementation
 
@@ -44,10 +46,14 @@ Analysis of Chlorophyll-a concentration patterns around Sri Lanka with monsoon-b
 ### Project Structure
 ```
 Repository/
-├── indian_ocean_sst_seasonal_analysis.ipynb - Original SST analysis
-├── flexible_sst_analysis.ipynb - Enhanced version with flexible file selection
-├── SL_Regional_Chlor_Monsoon_Analysis_v1.2.0.ipynb - Sri Lanka chlorophyll analysis
-└── sample_outputs/ (sample visualizations)
+├── indian_ocean_sst/
+│   ├── indian_ocean_sst_seasonal_analysis.ipynb - Original SST analysis
+│   ├── flexible_sst_analysis.v1.ipynb - Version 1 with flexible file selection
+│   └── Flexible_Indian_Ocean_SST_Analysis_v2.0.0.ipynb - Latest version with enhanced documentation
+├── sri_lanka_chlorophyll/
+│   └── SL_Regional_Chlor_Monsoon_Analysis_v1.2.0.ipynb - Sri Lanka chlorophyll analysis
+└── sample_outputs/
+    └── (visualization examples)
 ```
 
 ## Getting Started
@@ -70,13 +76,7 @@ conda activate ocean_analysis
 conda install xarray matplotlib numpy cartopy jupyter netCDF4
 ```
 
-## Sample Output Visualizations
-
-The analysis produces various visualizations including:
-- Seasonal temperature cycle plots
-- Regional temperature distribution maps
-- Monsoon-based chlorophyll concentration maps
-- Regional coastal water analysis for Sri Lanka
+## Sample Visualizations
 
 ### Sea Surface Temperature Analysis
 ![Enhanced Seasonal Maps](./sample_outputs/enhanced_seasonal_maps_2025_spring.png)
@@ -94,9 +94,10 @@ The analysis produces various visualizations including:
 - Extended time-series analysis for climate change indicators
 - Expansion to include salinity and ocean current analysis
 
-## Author
+## Contributors
 
-[Keerthi Abe](https://www.linkedin.com/in/keerthiabe/)
+- [Keerthi Abe](https://www.linkedin.com/in/keerthiabe/) - Primary Author
+- [Supervisor Name] - Project Supervisor
 
 ## License
 
