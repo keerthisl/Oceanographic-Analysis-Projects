@@ -76,7 +76,16 @@ conda activate ocean_analysis
 conda install xarray matplotlib numpy cartopy jupyter netCDF4
 ```
 
-## Sample Visualizations
+### Sample Visualizations
+
+![Indian Ocean SST Analysis Output 1](sample_outputs/Indian_Ocean_Region_SST_Analysis_v2_0.pix1.png)  
+*Key SST patterns from v2.0 notebook*
+
+![Indian Ocean SST Analysis Output 2](sample_outputs/Indian_Ocean_Region_SST_Analysis_v2_0.pix2.png)  
+*Regional seasonal contrasts (e.g., Arabian Sea vs Bay of Bengal)*
+
+![Indian Ocean SST Analysis Output 3](sample_outputs/Indian_Ocean_Region_SST_Analysis_v2_0.pix3.png)  
+*High-quality Cartopy map with spatial statistics*
 
 ### Sea Surface Temperature Analysis
 ![Enhanced Seasonal Maps](./sample_outputs/enhanced_seasonal_maps_2025_spring.png)
